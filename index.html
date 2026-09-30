@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6f2">
+    <meta name="description" content="查詢商店的刷卡與支付回饋，管理自己的支付方式。">
+    <title>回饋選擇器 | 刷卡回饋查詢</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳至主要內容</a>
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="回饋選擇器首頁" data-page-link="home">
+        <span class="brand-mark" aria-hidden="true">回</span>
+        <span class="brand-copy"><strong>回饋選擇器</strong><small>PAYMENT COMPASS</small></span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-label="開啟導覽選單" aria-expanded="false" aria-controls="primary-nav">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="primary-nav" id="primary-nav" aria-label="主要導覽">
+        <button class="nav-link is-active" type="button" data-page-link="home" aria-current="page">店家查詢</button>
+        <button class="nav-link" type="button" data-page-link="payments">我的支付方式</button>
+      </nav>
+      <div class="auth-area">
+        <button class="auth-trigger" id="auth-trigger" type="button" aria-haspopup="dialog">登入 / 註冊</button>
+      </div>
+    </header>
+    <div class="admin-mode-banner" id="admin-mode-banner" role="status" hidden>管理員版本已啟用</div>
+
+    <main id="main-content" class="page-shell">
+      <section class="page-section home-page" id="home-page" data-page="home" aria-labelledby="home-title">
+        <section class="admin-manager" id="store-manager" aria-labelledby="store-manager-title" hidden>
+          <div class="admin-manager-heading">
+            <div><p class="eyebrow">ADMIN TOOLS</p><h2 id="store-manager-title">店家管理</h2></div>
+            <span id="store-manager-count" class="admin-manager-count"></span>
+          </div>
+          <form class="admin-entry-form" id="store-manager-form">
+            <label>店名<input id="store-manager-name" type="text" maxlength="100" required></label>
+            <label>搜尋關鍵字<input id="store-manager-keywords" type="text" placeholder="以逗號分隔，可留空"></label>
+            <label>商店類別<input id="store-manager-category" type="text" maxlength="60" required></label>
+            <label class="admin-offers-field">優惠方式與回饋<textarea id="store-manager-offers" rows="2" placeholder="例如：UNIOPEN卡, 4%, 測試, 1%" required></textarea></label>
+            <div class="admin-form-footer"><p id="store-manager-status" role="status">新增、編輯或刪除 Store 文件</p><div class="admin-form-actions"><button class="text-button admin-cancel-edit" id="store-manager-cancel" type="button" hidden>取消編輯</button><button class="primary-button" id="store-manager-submit" type="submit">新增店家</button></div></div>
+          </form>
+          <div class="admin-delete-list" id="store-manager-list" aria-label="已建立店家"></div>
+        </section>
+
+        <div class="intro-row">
+          <div>
+            <p class="eyebrow">SMARTER EVERYDAY SPENDING</p>
+            <h1 id="home-title">每一筆消費，<span>都選對回饋。</span></h1>
+            <p class="intro-copy">搜尋店家，找出適合你的支付方式與回饋。</p>
+          </div>
+          <div class="intro-stamp" aria-hidden="true"><span>YOUR</span><strong>BEST<br>PAY</strong><span>CHOICE</span></div>
+        </div>
+
+        <form class="search-panel" id="store-search-form" role="search">
+          <label class="search-label" for="store-search">搜尋店家或關鍵字</label>
+          <div class="search-control">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+            <input id="store-search" name="store" type="search" placeholder="例如：咖啡、超市或店家名稱" autocomplete="off">
+            <button class="search-submit" type="submit">搜尋 <span aria-hidden="true">↗</span></button>
+          </div>
+          <p class="search-hint">可輸入店名、關鍵字或消費類別</p>
+        </form>
+
+        <div class="category-filters" id="store-category-filters" role="group" aria-label="依商店類別快速篩選"></div>
+
+        <div class="results-heading">
+          <div><p class="eyebrow">MATCHED FOR YOU</p><h2>店家查詢</h2></div>
+          <span id="results-count" class="results-count" aria-live="polite">載入中</span>
+        </div>
+        <div class="notice" id="app-notice" role="status" hidden></div>
+        <div class="store-list" id="store-list" aria-live="polite" aria-busy="true"></div>
+      </section>
+
+      <section class="page-section payments-page" id="payments-page" data-page="payments" aria-labelledby="payments-title" hidden>
+        <section class="admin-manager" id="payment-manager" aria-labelledby="payment-manager-title" hidden>
+          <div class="admin-manager-heading">
+            <div><p class="eyebrow">ADMIN TOOLS</p><h2 id="payment-manager-title">支付方式管理</h2></div>
+            <span id="payment-manager-count" class="admin-manager-count"></span>
+          </div>
+          <form class="admin-entry-form" id="payment-manager-form">
+            <label>支付方式名稱<input id="payment-manager-name" type="text" maxlength="100" required></label>
+            <label>搜尋關鍵字<input id="payment-manager-keywords" type="text" placeholder="以逗號分隔，可留空"></label>
+            <label>支付類別<input id="payment-manager-category" type="text" maxlength="60" required></label>
+            <label class="admin-offers-field">優惠方式與回饋<textarea id="payment-manager-offers" rows="2" placeholder="例如：UNIOPEN卡, 4%, 測試, 1%" required></textarea></label>
+            <div class="admin-form-footer"><p id="payment-manager-status" role="status">新增、編輯或刪除 PaymentMethods 文件</p><div class="admin-form-actions"><button class="text-button admin-cancel-edit" id="payment-manager-cancel" type="button" hidden>取消編輯</button><button class="primary-button" id="payment-manager-submit" type="submit">新增支付方式</button></div></div>
+          </form>
+          <div class="admin-delete-list" id="payment-manager-list" aria-label="已建立支付方式"></div>
+        </section>
+
+        <div class="subpage-heading">
+          <p class="eyebrow">YOUR WALLET, YOUR RULES</p>
+          <h1 id="payments-title">我的支付方式</h1>
+          <p>選擇你持有的卡片與支付工具，首頁會優先標示對應回饋。</p>
+        </div>
+        <div class="setup-guide" id="setup-guide" hidden>
+          <span class="guide-icon" aria-hidden="true">＋</span>
+          <p>您尚未設定擁有的支付方式，請在下方勾選並儲存。</p>
+        </div>
+        <div class="payment-toolbar">
+          <span id="selection-count" aria-live="polite">已選 0 項</span>
+          <label class="payment-search" for="payment-search">
+            <span class="visually-hidden">搜尋支付方式</span>
+            <input id="payment-search" type="search" placeholder="搜尋名稱、關鍵字或優惠" autocomplete="off">
+          </label>
+        </div>
+        <div id="payment-list" class="payment-list" aria-live="polite" aria-busy="true"></div>
+        <div class="save-bar">
+          <span id="save-status" role="status">變更尚未儲存</span>
+          <button class="primary-button" id="save-payments" type="button" disabled>儲存設定 <span aria-hidden="true">→</span></button>
+        </div>
+      </section>
+
+      <section class="page-section profile-page" id="profile-page" data-page="profile" aria-labelledby="profile-title" hidden>
+        <div class="subpage-heading">
+          <p class="eyebrow">YOUR ACCOUNT</p>
+          <h1 id="profile-title">個人資料</h1>
+          <p>檢視與更新你的顯示暱稱。</p>
+        </div>
+        <form class="profile-form" id="profile-form">
+          <label class="profile-field" for="profile-nickname">
+            <span>用戶暱稱</span>
+            <input id="profile-nickname" name="nickname" type="text" maxlength="40" required autocomplete="nickname">
+          </label>
+          <p class="profile-uid">UID <code id="profile-uid"></code></p>
+          <p class="profile-uid-warning">請勿透漏你的 UID 給其他人</p>
+          <div class="profile-save-row">
+            <p id="profile-status" role="status">載入中</p>
+            <button class="primary-button" type="submit">儲存暱稱 <span aria-hidden="true">→</span></button>
+          </div>
+        </form>
+        <div class="profile-account-actions">
+          <button class="auth-logout" id="auth-logout" type="button" hidden>登出</button>
+        </div>
+        <section class="admin-access" id="admin-access" aria-labelledby="admin-access-title" hidden>
+          <p class="eyebrow">ACCESS LEVEL</p>
+          <h2 id="admin-access-title">管理員版本</h2>
+          <p id="admin-access-status" role="status">正在檢查管理員權限…</p>
+          <button class="primary-button admin-mode-toggle" id="admin-mode-toggle" type="button" hidden disabled>切換管理員版本</button>
+        </section>
+      </section>
+    </main>
+    <footer class="site-footer"><span>回饋選擇器</span><span>資料以 Firebase Firestore 為準</span></footer>
+
+    <dialog class="auth-dialog" id="auth-dialog" aria-labelledby="auth-title">
+      <section class="auth-modal">
+        <button class="modal-close" id="auth-close" type="button" aria-label="關閉登入視窗">×</button>
+        <p class="eyebrow">YOUR PAYMENT COMPASS</p>
+        <h2 id="auth-title">歡迎回來</h2>
+        <div class="auth-modes" role="tablist" aria-label="帳戶操作">
+          <button class="auth-mode is-selected" type="button" role="tab" aria-selected="true" data-auth-mode="login">登入</button>
+          <button class="auth-mode" type="button" role="tab" aria-selected="false" data-auth-mode="signup">註冊</button>
+        </div>
+        <form id="auth-form" class="auth-form">
+          <label class="auth-field" id="nickname-field" hidden>
+            <span>暱稱</span>
+            <input id="auth-nickname" name="nickname" type="text" maxlength="40" autocomplete="nickname" placeholder="輸入顯示名稱">
+          </label>
+          <label class="auth-field">
+            <span>電子郵件</span>
+            <input id="auth-email" name="email" type="email" required autocomplete="email" placeholder="name@example.com">
+          </label>
+          <label class="auth-field">
+            <span>密碼</span>
+            <input id="auth-password" name="password" type="password" required minlength="6" autocomplete="current-password" placeholder="至少 6 個字元">
+          </label>
+          <p class="auth-error" id="auth-error" role="alert" hidden></p>
+          <button class="primary-button auth-submit" id="auth-submit" type="submit">電子郵件登入 <span aria-hidden="true">→</span></button>
+        </form>
+        <div class="auth-divider"><span>或使用</span></div>
+        <button class="google-button" id="google-signin" type="button">
+          <svg aria-hidden="true" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11c-.5 2.5-1.9 4.6-4 6v5h6.5c3.8-3.5 6.1-8.6 6.1-14.7Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.5-5c-1.8 1.2-4.1 2-7 2-5.3 0-9.8-3.6-11.4-8.4H5.9v5.2A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.6 27.8a12 12 0 0 1 0-7.6V15H5.9a20 20 0 0 0 0 18Z"/><path fill="#EA4335" d="M24 11.8c3 0 5.6 1 7.7 3l5.8-5.8C34 5.7 29.5 4 24 4A20 20 0 0 0 5.9 15l6.7 5.2C14.2 15.4 18.7 11.8 24 11.8Z"/></svg>
+          使用 Google 繼續
+        </button>
+        <p class="auth-privacy">登入後，暱稱會從你的個人資料載入。</p>
+      </section>
+    </dialog>
+  </body>
+</html>
